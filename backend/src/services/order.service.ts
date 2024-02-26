@@ -1,51 +1,84 @@
 import { Order } from '../models/Order';
-import { Product } from '../models/Product';
 
 export class OrderService {
-  private orders: Order[] = [];
+  constructor() {}
 
-  createOrder(newOrder: Order): Order {
-    // Generate a unique ID for the order
-    const id = Math.random().toString(36).substring(2, 9);
-    const orderWithId: Order = { ...newOrder, id, status: 'pending', timestamp: new Date() };
-    this.orders.push(orderWithId);
-    return orderWithId;
-  }
-
-  getOrderById(orderId: string): Order | undefined {
-    return this.orders.find(order => order.id === orderId);
-  }
-
-  getAllOrders(): Order[] {
-    return this.orders;
-  }
-
-  getOrdersByParkId(parkId: string): Order[] {
-    return this.orders.filter(order => order.parkId === parkId);
-  }
-
-  updateOrder(orderId: string, updatedOrderData: Partial<Order>): Order | undefined {
-    const orderIndex = this.orders.findIndex(order => order.id === orderId);
-    if (orderIndex !== -1) {
-      this.orders[orderIndex] = { ...this.orders[orderIndex], ...updatedOrderData };
-      return this.orders[orderIndex];
+  async createOrder(orderData: {
+    id: string;
+    customerId: string;
+    customerName: string; 
+    customerEmail: string; 
+    customerPhone?: string; 
+    products: string[]; 
+    totalAmount: number;
+    parkId: string;
+    alleyNumber: number;
+    status: 'pending' | 'completed' | 'cancelled';
+    timestamp: Date;
+  }): Promise<Order | null> {
+    try {
+      const order = await Order.create(orderData);
+      return order;
+    } catch (error) {
+      throw new Error('Error creating order');
     }
-    return undefined;
+  }
+  
+
+  async getOrderById(orderId: string): Promise<Order | null> {
+    try {
+      const order = await Order.findByPk(orderId);
+      return order;
+    } catch (error) {
+      throw new Error('Error retrieving order by ID');
+    }
   }
 
-  /*calculateTotalAmount(products: Product[]): number {
-    // Calculate subtotal for each product
-    const subtotals = products.map(product => product.price * product.quantity);
+  async getAllOrders(): Promise<Order[]> {
+    try {
+      const orders = await Order.findAll();
+      return orders;
+    } catch (error) {
+      throw new Error('Error retrieving all orders');
+    }
+  }
 
-    // Calculate total subtotal
-    const totalSubtotal = subtotals.reduce((acc, subtotal) => acc + subtotal, 0);
+  async updateOrder(orderId: string, updatedOrderData: {
+    customerId?: string;
+    customerName?: string;
+    customerEmail?: string;
+    customerPhone?: string;
+    products?: string[];
+    totalAmount?: number;
+    parkId?: string;
+    alleyNumber?: number;
+    status?: 'pending' | 'completed' | 'cancelled';
+    timestamp?: Date;
+  }): Promise<Order | null> {
+    try {
+      const order = await Order.findByPk(orderId);
+      if (!order) {
+        throw new Error('Order not found');
+      }
+      await order.update(updatedOrderData);
+      return order;
+    } catch (error) {
+      throw new Error('Error updating order');
+    }
+  }
+  
 
-    // Apply taxes and fees (if applicable)
-    const taxesAndFees = 0; // Placeholder for taxes and fees
+  async deleteOrder(orderId: string): Promise<boolean> {
+    try {
+      const order = await Order.findByPk(orderId);
+      if (!order) {
+        throw new Error('Order not found');
+      }
+      await order.destroy();
+      return true;
+    } catch (error) {
+      throw new Error('Error deleting order');
+    }
+  }
 
-    // Calculate total amount
-    const totalAmount = totalSubtotal + taxesAndFees;
-
-    return totalAmount;
-  }*/
 }

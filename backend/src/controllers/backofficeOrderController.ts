@@ -1,16 +1,29 @@
 import { Request, Response } from 'express';
 import { BackofficeOrderService } from '../services/backoffice.order.service';
 
-const backofficeOrderService = new BackofficeOrderService();
 
 export class BackofficeOrderController {
-  async getBackofficeOrdersByParkId(req: Request, res: Response): Promise<void> {
+  constructor(private backofficeOrderService: BackofficeOrderService) {}
+
+  sendOrderToBackoffice(req: Request, res: Response) {
+    try {
+      const order = req.body;
+      const backofficeOrder = this.backofficeOrderService.sendOrderToBackoffice(order);
+      res.status(201).json(backofficeOrder);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to send order to backoffice' });
+    }
+  }
+
+  getBackofficeOrdersByParkId(req: Request, res: Response) {
     try {
       const { parkId } = req.params;
-      const backofficeOrders = backofficeOrderService.getBackofficeOrdersByParkId(parkId);
-      res.status(200).json(backofficeOrders);
-    } catch (error: any) {
-      res.status(400).json({ error: error.message });
+      const orders = this.backofficeOrderService.getBackofficeOrdersByParkId(parkId);
+      res.status(200).json(orders);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to retrieve backoffice orders' });
     }
   }
 }
+
+export default BackofficeOrderController;
