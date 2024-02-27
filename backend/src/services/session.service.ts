@@ -1,21 +1,61 @@
-import { Session } from '../models/Session';
+import { Session, SessionAttributes } from '../models/Session';
 
 export class SessionService {
-  private sessions: Session[] = [];
+    async createSession(newSessionData: SessionAttributes): Promise<Session | null> {
+        try {
+            const createdSession = await Session.create(newSessionData);
+            return createdSession;
+        } catch (error) {
+            console.error('Error creating session:', error);
+            return null;
+        }
+    }
 
-  createSession(newSession: Session): Session {
-    // Generate a unique ID for the session
-    const id = Math.random().toString(36).substring(2, 9);
-    const sessionWithId: Session = { ...newSession, id };
-    this.sessions.push(sessionWithId);
-    return sessionWithId;
-  }
+    async getSessionById(sessionId: string): Promise<Session | null> {
+        try {
+            const session = await Session.findByPk(sessionId);
+            return session;
+        } catch (error) {
+            console.error('Error retrieving session by ID:', error);
+            return null;
+        }
+    }
 
-  getSessionById(sessionId: string): Session | undefined {
-    return this.sessions.find(session => session.id === sessionId);
-  }
+    async getAllSessions(): Promise<Session[] | null> {
+        try {
+            const sessions = await Session.findAll();
+            return sessions;
+        } catch (error) {
+            console.error('Error retrieving all sessions:', error);
+            return null;
+        }
+    }
 
-  getAllSessions(): Session[] {
-    return this.sessions;
-  }
+    async updateSession(sessionId: string, updatedSessionData: Partial<SessionAttributes>): Promise<Session | null> {
+        try {
+            const session = await Session.findByPk(sessionId);
+            if (!session) {
+                return null;
+            }
+            await session.update(updatedSessionData);
+            return session;
+        } catch (error) {
+            console.error('Error updating session:', error);
+            return null;
+        }
+    }
+
+    async deleteSession(sessionId: string): Promise<boolean> {
+        try {
+            const session = await Session.findByPk(sessionId);
+            if (!session) {
+                return false;
+            }
+            await session.destroy();
+            return true;
+        } catch (error) {
+            console.error('Error deleting session:', error);
+            return false;
+        }
+    }
 }
