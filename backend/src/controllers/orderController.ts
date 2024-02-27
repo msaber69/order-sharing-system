@@ -3,7 +3,7 @@ import { OrderService } from '../services/order.service';
 
 const router = express.Router();
 
-class OrderController {
+export class OrderController {
   constructor(private orderService: OrderService) {}
 
   createOrder = async (req: express.Request, res: express.Response) => {

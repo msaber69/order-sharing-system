@@ -1,49 +1,65 @@
-import { BackofficeOrder } from '../models/BackofficeOrder';
-import { Order } from '../models/Order';
+import { BackofficeOrder, BackofficeOrderAttributes } from '../models/BackofficeOrder';
 
 export class BackofficeOrderService {
-  private backofficeOrders: BackofficeOrder[] = [];
-
-  sendOrderToBackoffice(order: Order): BackofficeOrder {
-    // Map order to backoffice order and send to backoffice
-    const backofficeOrder: BackofficeOrder = {
-      id: order.id,
-      customerId: order.customerId,
-      products: order.products,
-      totalAmount: order.totalAmount,
-      parkId: order.parkId,
-      alleyNumber: order.alleyNumber,
-      status: 'received',
-      timestamp: order.timestamp
-    };
-    this.backofficeOrders.push(backofficeOrder);
-    return backofficeOrder;
-  }
-
-  getBackofficeOrdersByParkId(parkId: string): BackofficeOrder[] {
-    return this.backofficeOrders.filter(order => order.parkId === parkId);
-  }
-
-  getAllBackofficeOrders(): BackofficeOrder[] {
-    return this.backofficeOrders;
-  }
-
-  getBackofficeOrderById(orderId: string): BackofficeOrder | undefined {
-    return this.backofficeOrders.find(order => order.id === orderId);
-  }
-
-  updateBackofficeOrder(orderId: string, updatedOrderData: Partial<BackofficeOrder>): BackofficeOrder | undefined {
-    const orderIndex = this.backofficeOrders.findIndex(order => order.id === orderId);
-    if (orderIndex !== -1) {
-      this.backofficeOrders[orderIndex] = { ...this.backofficeOrders[orderIndex], ...updatedOrderData };
-      return this.backofficeOrders[orderIndex];
+  async sendOrderToBackoffice(order: BackofficeOrderAttributes): Promise<BackofficeOrder | null> {
+    try {
+      const backofficeOrder = await BackofficeOrder.create(order);
+      return backofficeOrder;
+    } catch (error) {
+      throw new Error('Error sending order to backoffice');
     }
-    return undefined;
   }
 
-  deleteBackofficeOrder(orderId: string): boolean {
-    const initialLength = this.backofficeOrders.length;
-    this.backofficeOrders = this.backofficeOrders.filter(order => order.id !== orderId);
-    return this.backofficeOrders.length !== initialLength;
+  async getBackofficeOrdersByParkId(parkId: string): Promise<BackofficeOrder[]> {
+    try {
+      const orders = await BackofficeOrder.findAll({ where: { parkId } });
+      return orders;
+    } catch (error) {
+      throw new Error('Error retrieving backoffice orders by park ID');
+    }
+  }
+
+  async getAllBackofficeOrders(): Promise<BackofficeOrder[]> {
+    try {
+      const orders = await BackofficeOrder.findAll();
+      return orders;
+    } catch (error) {
+      throw new Error('Error retrieving all backoffice orders');
+    }
+  }
+
+  async getBackofficeOrderById(orderId: string): Promise<BackofficeOrder | null> {
+    try {
+      const order = await BackofficeOrder.findByPk(orderId);
+      return order;
+    } catch (error) {
+      throw new Error('Error retrieving backoffice order by ID');
+    }
+  }
+
+  async updateBackofficeOrder(orderId: string, updatedOrderData: Partial<BackofficeOrderAttributes>): Promise<BackofficeOrder | null> {
+    try {
+      const order = await BackofficeOrder.findByPk(orderId);
+      if (!order) {
+        throw new Error('Backoffice order not found');
+      }
+      await order.update(updatedOrderData);
+      return order;
+    } catch (error) {
+      throw new Error('Error updating backoffice order');
+    }
+  }
+
+  async deleteBackofficeOrder(orderId: string): Promise<boolean> {
+    try {
+      const order = await BackofficeOrder.findByPk(orderId);
+      if (!order) {
+        throw new Error('Backoffice order not found');
+      }
+      await order.destroy();
+      return true;
+    } catch (error) {
+      throw new Error('Error deleting backoffice order');
+    }
   }
 }

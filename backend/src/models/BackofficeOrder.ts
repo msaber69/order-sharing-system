@@ -1,7 +1,7 @@
 import { DataTypes, Model } from 'sequelize';
 import { sequelize } from '../config/db';
 
-interface BackofficeOrderAttributes {
+export interface BackofficeOrderAttributes {
   id: string;
   orderId: string;
   customerId: string;
