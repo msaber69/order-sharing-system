@@ -8,6 +8,7 @@ import qrCodeRoutes from './routes/qrCodeRoutes';
 import backofficeOrderRoutes from './routes/backofficeOrderRoutes';
 import { sequelize } from './config/db';
 
+
 const app = express();
 
 // Set up middleware

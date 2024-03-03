@@ -1,48 +1,37 @@
-import { MakeNullishOptional } from 'sequelize/types/utils';
 import Stripe from 'stripe';
 
-interface PaymentIntent {
-    id: string;
-    amount: number;
-    currency: string;
-    description: string | null;
-    clientSecret: string | null;
-}
+const stripe = new Stripe('sk_test_51Oo9XUEzFTNbZPpRszO62lmamCRs8Sg2TXhi3NQZAB7zPqh49UsF7QTZoYaL6D1s7dVVR2IKRQ4TlTWYr5GrZMep00NzPLgHnw');
 
 export class PaymentService {
     private stripe: Stripe;
 
     constructor(secretKey: string) {
-        this.stripe = new Stripe(secretKey, { apiVersion: '2023-10-16' });
+        this.stripe = new Stripe(secretKey, {
+            apiVersion: '2023-10-16',
+        });
     }
 
-    async createPaymentIntent(amount: number, currency: string, description: string): Promise<PaymentIntent | null> {
+    async createPaymentIntent(amount: number, currency: string, description: string): Promise<Stripe.PaymentIntent | null> {
         try {
             const paymentIntent = await this.stripe.paymentIntents.create({
                 amount,
                 currency,
                 description,
             });
-            return {
-                id: paymentIntent.id,
-                amount: paymentIntent.amount,
-                currency: paymentIntent.currency,
-                description: paymentIntent.description,
-                clientSecret: paymentIntent.client_secret,
-            };
+            return paymentIntent;
         } catch (error) {
             console.error('Error creating payment intent:', error);
             return null;
         }
     }
 
-    async confirmPaymentIntent(paymentIntentId: string): Promise<string> {
+    async confirmPaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent | null> {
         try {
             const paymentIntent = await this.stripe.paymentIntents.confirm(paymentIntentId);
-            return paymentIntent.status;
+            return paymentIntent;
         } catch (error) {
             console.error('Error confirming payment intent:', error);
-            throw error;
+            return null;
         }
     }
 }

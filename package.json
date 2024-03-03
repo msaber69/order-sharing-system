@@ -9,8 +9,10 @@
     "backend"
   ],
   "dependencies": {
+    "@stripe/stripe-js": "^3.0.6",
     "@types/sequelize": "^4.28.20",
     "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.2.0",
     "mysql2": "^3.9.2",
